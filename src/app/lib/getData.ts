@@ -30,7 +30,7 @@ const githubApi = axios.create({
   baseURL: `https://api.github.com`,
   headers: {
     Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-    // "Content-Type": "application/json",
+    "Content-Type": "application/json",
   },
 });
 
