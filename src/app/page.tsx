@@ -2,12 +2,13 @@
 
 import React, { useEffect, useMemo } from "react";
 import UserList from "./_components/UserList";
-import { Skeleton } from "@radix-ui/themes";
+import { Box, Button, Skeleton, Tabs } from "@radix-ui/themes";
 
 import { fetchGithubUsers } from "./lib/getData";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
+import BookmarkList from "./_components/BookMarkList";
 
 export default function Home() {
   const { inView, ref } = useInView({
@@ -45,12 +46,29 @@ export default function Home() {
   }
 
   return (
-    <main className="flex  flex-col items-center justify-between p-24">
-      <div className="font-bold text-2xl items-center flex">User List</div>
-      <ScrollArea>
-        <UserList data={data?.pages.flatMap((res) => res) || []} />
-        {isFetchingNextPage ? <Skeleton /> : <div ref={ref} />}
-      </ScrollArea>
-    </main>
+    <>
+      <Tabs.Root defaultValue="account">
+        <Tabs.List>
+          <Tabs.Trigger value="account">Account</Tabs.Trigger>
+          <Tabs.Trigger value="documents">Documents</Tabs.Trigger>
+        </Tabs.List>
+        <Box pt="2">
+          <Tabs.Content value="account">
+            <div className="flex  flex-col items-center justify-between p-24 ">
+              <div className="font-bold text-2xl items-center flex">
+                User List
+              </div>
+              <ScrollArea>
+                <UserList data={data?.pages.flatMap((res) => res) || []} />
+                {isFetchingNextPage ? <Skeleton /> : <div ref={ref} />}
+              </ScrollArea>
+            </div>
+          </Tabs.Content>
+          <Tabs.Content value="documents">
+            <BookmarkList />
+          </Tabs.Content>
+        </Box>
+      </Tabs.Root>
+    </>
   );
 }
