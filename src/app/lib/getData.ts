@@ -22,19 +22,28 @@ export type Response = {
   site_admin: boolean;
 };
 
+type Params = {
+  page: { pageParam: number };
+  per_page: number;
+};
 const githubApi = axios.create({
   baseURL: `https://api.github.com`,
   headers: {
     Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-    "Content-Type": "application/json",
+    // "Content-Type": "application/json",
   },
 });
 
-export const fetchGithubUsers = async (page: number) => {
+export const fetchGithubUsers = async ({
+  pageParam,
+}: {
+  pageParam: number;
+}) => {
   try {
-    const response = await githubApi.get<Response[]>("/users", {
-      params: { per_page: 20, page },
+    const response = await githubApi.get("/users", {
+      params: { since: pageParam, per_page: 20 },
     });
+
     if (!response) {
       throw new Error("failed Error");
     }
