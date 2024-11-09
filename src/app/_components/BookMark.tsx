@@ -1,22 +1,22 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React from "react";
 import BookMarkIcon from "../assets/Icon/BookMarkIcon";
-import { Response } from "../lib/getData";
 import useCartStore from "../store/cartStore";
+import { GitHubUser } from "../lib/getData";
 
 type BookMarkProps = {
-  bookmark: Response;
+  bookmark: GitHubUser;
 };
 function BookMark({ bookmark }: BookMarkProps) {
   const { addToCart, toggleSelectItem, selectedItemIds } = useCartStore();
 
   const handleClick = () => {
     addToCart(bookmark);
-    toggleSelectItem(bookmark.login); // 클릭 시 선택 상태 토글
+    toggleSelectItem(bookmark?.login); // 클릭 시 선택 상태 토글
   };
 
-  const isSelected = selectedItemIds.includes(bookmark.login);
+  const isSelected = selectedItemIds.includes(bookmark?.login);
   return (
     <BookMarkIcon
       className={`cursor-pointer  ${isSelected ? "text-blue-500" : "bg-transparent"}`}
