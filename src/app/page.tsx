@@ -1,19 +1,24 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import UserList from "./_components/UserList";
 import { Box, Button, Skeleton, Tabs } from "@radix-ui/themes";
 
-import { fetchGithubUsers } from "./lib/getData";
+import { fetchGithubUsers, GitHubSearchResponse } from "./lib/getData";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { useInView } from "react-intersection-observer";
 import { ScrollArea } from "@radix-ui/react-scroll-area";
 import BookmarkList from "./_components/BookMarkList";
+import SearchInfput from "./_components/SearchInfput";
+import debounce from "lodash/debounce";
 
 export default function Home() {
+  const [searchInput, setSearchInput] = useState("");
+  const [query, setQuery] = useState<string | undefined>("");
   const { inView, ref } = useInView({
     threshold: 0.2,
   });
+
   const {
     data,
     hasNextPage,
@@ -22,17 +27,20 @@ export default function Home() {
     isFetchingNextPage,
     isLoading,
   } = useInfiniteQuery({
-    queryKey: ["users"],
-    queryFn: fetchGithubUsers,
-    retry: 0,
-    refetchOnMount: false,
-    refetchOnReconnect: false,
-    refetchOnWindowFocus: false,
+    queryKey: ["users", query],
+    queryFn: ({ pageParam = 1 }) =>
+      fetchGithubUsers({
+        pageParam,
+        query: query || "type:user",
+      }),
+    retry: 2, // 요청 실패 시 최대 2회 재시도
+    refetchOnMount: false, // 페이지 로드 시 리패치 방지
+    refetchOnReconnect: false, // 네트워크 재연결 시 리패치 방지
+    refetchOnWindowFocus: false, // 창 포커스 시 리패치 방지
+    staleTime: 1000 * 60 * 5, // 5분 동안 데이터를 신선하게 유지
     getNextPageParam: (lastPage, allPages) => {
       const nextPage = allPages.length + 1;
-      return lastPage?.length === 0 || lastPage.length < 20
-        ? undefined
-        : nextPage;
+      return lastPage.items.length === 0 ? null : nextPage;
     },
     initialPageParam: 1,
   });
@@ -41,9 +49,17 @@ export default function Home() {
     if (inView) fetchNextPage();
   }, [inView]);
 
-  if (isLoading) {
-    return <Skeleton />;
-  }
+  const debouncedSearch = useCallback(
+    debounce((value: string) => {
+      setQuery(value);
+    }, 500),
+    []
+  );
+
+  const handleSearchInputChange = (value: string) => {
+    setSearchInput(value);
+    debouncedSearch(value);
+  };
 
   return (
     <>
@@ -58,8 +74,15 @@ export default function Home() {
               <div className="font-bold text-2xl items-center flex">
                 User List
               </div>
+              <SearchInfput
+                isLoading={isLoading}
+                onChange={handleSearchInputChange}
+                searchInput={searchInput}
+              />
               <ScrollArea>
-                <UserList data={data?.pages.flatMap((res) => res) || []} />
+                <UserList
+                  data={data?.pages?.flatMap((res) => res.items) || []}
+                />
                 {isFetchingNextPage ? <Skeleton /> : <div ref={ref} />}
               </ScrollArea>
             </div>

@@ -1,10 +1,10 @@
 import { create } from "zustand";
-import { Response } from "../lib/getData";
+import { GitHubSearchResponse, GitHubUser } from "../lib/getData";
 
 type CartState = {
-  items: Response[];
+  items: GitHubUser[];
   selectedItemIds: string[]; // 선택된 아이템 ID를 배열로 변경
-  addToCart: (user: Response) => void;
+  addToCart: (user: GitHubUser) => void;
   loadCart: () => void; // 로컬 스토리지에서 로드하는 함수
   toggleSelectItem: (id: string) => void; // 선택 상태 토글 함수 추가
 };
