@@ -19,7 +19,8 @@ function BookMark({ bookmark }: BookMarkProps) {
   const isSelected = selectedItemIds.includes(bookmark?.login);
   return (
     <BookMarkIcon
-      className={`cursor-pointer  ${isSelected ? "text-blue-500" : "bg-transparent"}`}
+      className="cursor-pointer"
+      isSelected={isSelected} // 동적으로 색상을 제어하는 prop
       onClick={() => handleClick()}
     />
   );

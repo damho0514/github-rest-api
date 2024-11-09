@@ -3,7 +3,6 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import React from "react";
 import "@radix-ui/themes/styles.css";
-import { ThemeProvider } from "./_components/theme-provider";
 import ReactQueryProvider from "./utills/reactQueryProvider";
 import { Theme } from "@radix-ui/themes";
 
