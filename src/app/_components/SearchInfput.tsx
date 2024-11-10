@@ -12,7 +12,11 @@ function SearchInfput({ onChange }: SearchInfputProps) {
   return (
     <TextField.Root
       value={searchInput}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(e) => {
+        const value = e.target.value;
+        onChange(value);
+        setSearchInput(value);
+      }}
       placeholder="Search the docs…"
       size="2"
       className="w-48"
