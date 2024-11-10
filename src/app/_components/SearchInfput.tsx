@@ -1,15 +1,14 @@
 "use client";
 
-import { Spinner, TextField } from "@radix-ui/themes";
-import React, { useCallback, useEffect, useState } from "react";
+import { TextField } from "@radix-ui/themes";
+import React, { useState } from "react";
 import SearchIcon from "../assets/Icon/SearchIcon";
 
 type SearchInfputProps = {
   onChange: (v: string) => void;
-  searchInput: string;
-  isLoading: boolean;
 };
-function SearchInfput({ isLoading, searchInput, onChange }: SearchInfputProps) {
+function SearchInfput({ onChange }: SearchInfputProps) {
+  const [searchInput, setSearchInput] = useState("");
   return (
     <TextField.Root
       value={searchInput}
@@ -19,7 +18,7 @@ function SearchInfput({ isLoading, searchInput, onChange }: SearchInfputProps) {
       className="w-48"
     >
       <TextField.Slot>
-        {isLoading ? <Spinner /> : <SearchIcon />}
+        <SearchIcon />
       </TextField.Slot>
     </TextField.Root>
   );

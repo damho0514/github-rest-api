@@ -3,10 +3,10 @@ import React from "react";
 import { GitHubUser } from "../lib/getData";
 import BookMark from "./BookMark";
 
-type UserListProps = {
+type UserItemProps = {
   data: GitHubUser[];
 };
-export default function UserList({ data }: UserListProps) {
+export default function UserItem({ data }: UserItemProps) {
   return (
     <div className="flex justify-center">
       <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 mt-12 gap-4  grid-cols-4">
