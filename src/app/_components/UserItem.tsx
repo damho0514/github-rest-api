@@ -6,10 +6,11 @@ import BookMark from "./BookMark";
 type UserItemProps = {
   data: GitHubUser[];
 };
+
 export default function UserItem({ data }: UserItemProps) {
   return (
     <div className="flex justify-center">
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 mt-12 gap-4  grid-cols-4">
+      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 mt-12 gap-4 grid-cols-1 md:grid-cols-2 lg:grid-cols-4">
         {data.map((item, idx) => (
           <div
             key={idx}
@@ -24,7 +25,9 @@ export default function UserItem({ data }: UserItemProps) {
                 priority
                 className="bg-slate-500 rounded-full"
               />
-              <h2 className="text-md font-semibold">{item.login}</h2>
+              <h2 className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold truncate">
+                {item.login}
+              </h2>
             </div>
             <div className="flex flex-col justify-start text-start">
               <p className="py-1">User ID: {item.id}</p>

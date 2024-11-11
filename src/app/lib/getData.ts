@@ -44,7 +44,7 @@ export const fetchGithubUsers = async ({
 }) => {
   try {
     const response = await octokit.request(`GET /search/users`, {
-      q: query ? `${query} in:login created:>2023-01-01` : "type:user",
+      q: `${query} in:login created:>2023-01-01`,
       page: pageParam, // 페이지 번호
       per_page: 20, // 한 페이지당 항목 수
     });
