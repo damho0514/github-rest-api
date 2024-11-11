@@ -1,55 +1,67 @@
 import axios from "axios";
+import { Octokit } from "@octokit/rest";
 
-export type Response = {
+export type GitHubUser = {
   login: string;
   id: number;
-  node_id: string;
   avatar_url: string;
-  gravatar_id: string;
-  url: string;
-  html_url: string;
-  followers_url: string;
-  following_url: string;
-  gists_url: string;
-  starred_url: string;
-  subscriptions_url: string;
-  organizations_url: string;
-  repos_url: string;
-  events_url: string;
-  received_events_url: string;
   type: string;
-  user_view_type: string;
-  site_admin: boolean;
 };
 
-type Params = {
-  page: { pageParam: number };
-  per_page: number;
+export type GitHubSearchResponse = {
+  total_count: number;
+  incomplete_results: boolean;
+  items: GitHubUser[];
 };
-const githubApi = axios.create({
-  baseURL: `https://api.github.com`,
-  headers: {
-    Authorization: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
-    // "Content-Type": "application/json",
+
+// Octokit 인스턴스 생성 시, throttle 옵션 추가
+const octokit = new Octokit({
+  auth: `Bearer ${process.env.NEXT_PUBLIC_GITHUB_TOKEN}`,
+  throttle: {
+    // 기본 rate limit 처리
+    onRateLimit: (retryAfter, options) => {
+      console.log(
+        `Rate limit exceeded, retrying after ${retryAfter} seconds...`
+      );
+      return true; // retry를 위한 설정, true일 경우 재시도
+    },
+    // Secondary rate limit 처리
+    onSecondaryRateLimit: (retryAfter, options) => {
+      console.log(
+        `Secondary rate limit exceeded, retrying after ${retryAfter} seconds...`
+      );
+      return true; // retry를 위한 설정, true일 경우 재시도
+    },
   },
 });
 
 export const fetchGithubUsers = async ({
   pageParam,
+  query,
 }: {
   pageParam: number;
+  query: string;
 }) => {
   try {
-    const response = await githubApi.get("/users", {
-      params: { since: pageParam, per_page: 20 },
+    const response = await octokit.request(`GET /search/users`, {
+      q: `${query} in:login created:>2023-01-01`,
+      page: pageParam, // 페이지 번호
+      per_page: 20, // 한 페이지당 항목 수
     });
-
-    if (!response) {
-      throw new Error("failed Error");
-    }
     return response.data;
   } catch (error) {
-    console.error("API Call Error:", error);
-    throw error;
+    if (error.response?.status === 403) {
+      const retryAfter = error.response.headers["retry-after"];
+      const waitTime = retryAfter ? parseInt(retryAfter) * 1000 : 3000; // `retry-after` 헤더가 있으면 그 시간만큼 기다림
+      await sleep(waitTime); // 대기 후 재시도
+
+      throw new Error("Too many attempts, rate limit exceeded.");
+    } else {
+      throw error; // 다른 에러 발생 시 에러를 던짐
+    }
   }
 };
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
