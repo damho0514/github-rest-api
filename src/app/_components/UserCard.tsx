@@ -1,11 +1,5 @@
-import {
-  Box,
-  Flex,
-  ScrollArea,
-  Skeleton,
-  Spinner,
-  Tabs,
-} from "@radix-ui/themes";
+import { Flex, ScrollArea, Spinner, Tabs } from "@radix-ui/themes";
+import * as Toggle from "@radix-ui/react-toggle";
 import React, { useCallback, useEffect, useState } from "react";
 import SearchInfput from "./SearchInfput";
 import UserItem from "./UserItem";
@@ -20,6 +14,7 @@ import { useToastStore } from "../store/toastStore";
 export default function UserCard() {
   const { showToast } = useToastStore();
   const [query, setQuery] = useState<string | undefined>("");
+  const [userType, setUserType] = useState<"User" | "Organization" | "">("");
   const { inView, ref } = useInView({
     threshold: 0.2,
   });
@@ -32,14 +27,13 @@ export default function UserCard() {
     isFetchingNextPage,
     isLoading,
   } = useInfiniteQuery({
-    queryKey: ["users", query],
+    queryKey: ["users", query, userType],
     queryFn: ({ pageParam = 1 }) =>
       fetchGithubUsers({
         pageParam,
-        query: query || "type:user",
+        query: `${query}${userType}`,
       }),
     retry(failureCount, error) {
-      console.log({ error });
       if (error) {
         showToast("error", error.message);
         return false;
@@ -70,7 +64,7 @@ export default function UserCard() {
   );
 
   return (
-    <Box pt="2">
+    <>
       <ToastUI />
       <Tabs.Content value="account">
         <div className="flex  flex-col items-center justify-between p-24 ">
@@ -80,32 +74,43 @@ export default function UserCard() {
               debouncedSearch(v);
             }}
           />
+          <Flex className="items-center gap-3">
+            <div>User Type:</div>
+            <Toggle.Root
+              pressed={userType === "User"}
+              onPressedChange={(e) => setUserType(e ? "User" : "")}
+              aria-label="Toggle italic"
+              className="flex  items-center justify-center rounded bg-white leading-4 text-mauve11 shadow-[0_2px_10px] shadow-blackA4 hover:bg-violet3 focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=on]:bg-violet6 data-[state=on]:text-violet12"
+            >
+              User
+            </Toggle.Root>
+            <Toggle.Root
+              pressed={userType === "Organization"}
+              onPressedChange={(pressed) =>
+                setUserType(pressed ? "Organization" : "")
+              }
+              aria-label="Toggle italic"
+              className="flex items-center justify-center rounded bg-white leading-4 text-mauve11 shadow-[0_2px_10px] shadow-blackA4 hover:bg-violet3 focus:shadow-[0_0_0_2px] focus:shadow-black data-[state=on]:bg-violet6 data-[state=on]:text-violet12"
+            >
+              Organizer
+            </Toggle.Root>
+          </Flex>
+
           <ScrollArea>
             {isLoading ? (
-              // 최초 로딩 중인 경우 스켈레톤 컴포넌트를 표시
               <SkeletonUserItem />
             ) : (
-              // 로딩이 완료되면 데이터 렌더링
               <UserItem data={data?.pages?.flatMap((res) => res.items) || []} />
             )}
             <div ref={ref} />
           </ScrollArea>
           {isFetchingNextPage && (
-            <Flex
-              style={{
-                display: "flex",
-                justifyContent: "center",
-                padding: "15px",
-              }}
-            >
-              <Spinner
-                loading={true}
-                style={{ width: "25px", height: "25px" }}
-              />
+            <Flex className="flex justify-center p-[15px]">
+              <Spinner className="w-6 h-6" />
             </Flex>
           )}
         </div>
       </Tabs.Content>
-    </Box>
+    </>
   );
 }
