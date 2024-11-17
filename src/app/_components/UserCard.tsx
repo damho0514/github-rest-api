@@ -31,7 +31,7 @@ export default function UserCard() {
     queryFn: ({ pageParam = 1 }) =>
       fetchGithubUsers({
         pageParam,
-        query: `${query}${userType}`,
+        query: `${query} type:${userType}`,
       }),
     retry(failureCount, error) {
       if (error) {
